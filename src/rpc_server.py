@@ -15,6 +15,7 @@ OP_CREATE_REPLY = 7
 OP_GET_REPLIES = 8
 OP_GET_REPLY_BY_ID = 9
 OP_GET_REPLIES_WITH_PARTICIPANT = 10
+OP_RESET = 99
 
 # Хранилища данных (словари)
 participants = {}
@@ -26,10 +27,9 @@ JOURNAL_FILE = 'journal.log'
 
 
 def log(message: str):
-    """Записывает сообщение в journal.log и выводит в консоль."""
+    """Записывает сообщение в journal.log."""
     with open(JOURNAL_FILE, 'a', encoding='utf-8') as f:
         f.write(message + '\n')
-    print(message)
 
 
 # Функции модели слоя доступа к данным
@@ -105,6 +105,14 @@ def get_replies_with_participant():
     return result
 
 
+def reset_data():
+    """Очищает все хранилища."""
+    participants.clear()
+    commands.clear()
+    replies.clear()
+    return 'ok'
+
+
 # Обработка запросов
 
 def handle_request(opcode: int, body: dict) -> dict:
@@ -129,9 +137,11 @@ def handle_request(opcode: int, body: dict) -> dict:
         result = get_reply_by_id(body['id'])
     elif opcode == OP_GET_REPLIES_WITH_PARTICIPANT:
         result = get_replies_with_participant()
+    elif opcode == OP_RESET:
+        result = reset_data()
     else:
         return {'error': f'Неизвестный код операции: {opcode}'}
-    
+
     return {'result': result}
 
 
@@ -145,17 +155,17 @@ def handle_client(conn, addr):
             opcode, body = recv_message(conn)
             if opcode is None:
                 break
-            
+
             log(f'[Запрос] opcode={opcode}, body={body}')
-            
+
             try:
                 response_body = handle_request(opcode, body)
             except Exception as e:
                 response_body = {'error': str(e)}
-            
+
             response = pack_message(opcode, response_body)
             conn.sendall(response)
-            
+
             log(f'[Ответ] opcode={opcode}, body={response_body}')
     except ConnectionResetError:
         pass
@@ -171,7 +181,7 @@ def start_server(host: str = '127.0.0.1', port: int = 8000):
     server.bind((host, port))
     server.listen(5)
     print(f'[Сервер] Запущен на {host}:{port}')
-    
+
     try:
         while True:
             conn, addr = server.accept()

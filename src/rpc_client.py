@@ -37,7 +37,7 @@ class RpcClient:
             raise Exception(response_body['error'])
         return response_body['result']
 
-    #Participant
+    #PARTICIPANT
     def create_participant(self, ip: str, description: str) -> int:
         return self._call(OP_CREATE_PARTICIPANT, {'ip': ip, 'description': description})
 
@@ -47,7 +47,7 @@ class RpcClient:
     def get_participant_by_id(self, id: int):
         return self._call(OP_GET_PARTICIPANT_BY_ID, {'id': id})
 
-    #Command
+    #COMMAND
     def create_command(self, participant: int, description: str) -> int:
         return self._call(OP_CREATE_COMMAND, {'participant': participant, 'description': description})
 
@@ -57,7 +57,7 @@ class RpcClient:
     def get_command_by_id(self, id: int):
         return self._call(OP_GET_COMMAND_BY_ID, {'id': id})
 
-    #Reply
+    #REPLY
     def create_reply(self, command: int, response: str) -> int:
         return self._call(OP_CREATE_REPLY, {'command': command, 'response': response})
 
@@ -67,5 +67,10 @@ class RpcClient:
     def get_reply_by_id(self, id: int):
         return self._call(OP_GET_REPLY_BY_ID, {'id': id})
 
+    #СЛОЖНЫЙ ЗАПРОС
     def get_replies_with_participant(self):
         return self._call(OP_GET_REPLIES_WITH_PARTICIPANT, {})
+
+    #СБРОС
+    def reset(self):
+        return self._call(99, {})
