@@ -1,10 +1,17 @@
+"""
+RPC-сервер на основе TCP.
+
+Принимает запросы от клиента, выполняет операции над моделью данных
+и возвращает результат. Все запросы и ответы журналируются в journal.log.
+"""
+
 import socket
 import threading
+import time
 
 from protocol import pack_message, recv_message
 
 
-# Коды операций
 OP_CREATE_PARTICIPANT = 1
 OP_GET_PARTICIPANTS = 2
 OP_GET_PARTICIPANT_BY_ID = 3
@@ -17,12 +24,10 @@ OP_GET_REPLY_BY_ID = 9
 OP_GET_REPLIES_WITH_PARTICIPANT = 10
 OP_RESET = 99
 
-# Хранилища данных (словари)
 participants = {}
 commands = {}
 replies = {}
 
-# Журнал
 JOURNAL_FILE = 'journal.log'
 
 
@@ -31,8 +36,6 @@ def log(message: str):
     with open(JOURNAL_FILE, 'a', encoding='utf-8') as f:
         f.write(message + '\n')
 
-
-# Функции модели слоя доступа к данным
 
 def create_participant(ip: str, description: str) -> int:
     id = len(participants)
@@ -49,7 +52,6 @@ def get_participant_by_id(id: int):
 
 
 def create_command(participant: int, description: str) -> int:
-    import time
     id = len(commands)
     commands[id] = {
         'participant': participant,
@@ -85,7 +87,6 @@ def get_reply_by_id(id: int):
 
 
 def get_replies_with_participant():
-    import time
     result = []
     now = int(time.time())
     for reply in replies.values():
@@ -113,39 +114,72 @@ def reset_data():
     return 'ok'
 
 
-# Обработка запросов
+def handle_create_participant(body):
+    return create_participant(body['ip'], body['description'])
+
+
+def handle_get_participants(body):
+    return get_participants()
+
+
+def handle_get_participant_by_id(body):
+    return get_participant_by_id(body['id'])
+
+
+def handle_create_command(body):
+    return create_command(body['participant'], body['description'])
+
+
+def handle_get_commands(body):
+    return get_commands()
+
+
+def handle_get_command_by_id(body):
+    return get_command_by_id(body['id'])
+
+
+def handle_create_reply(body):
+    return create_reply(body['command'], body['response'])
+
+
+def handle_get_replies(body):
+    return get_replies()
+
+
+def handle_get_reply_by_id(body):
+    return get_reply_by_id(body['id'])
+
+
+def handle_get_replies_with_participant(body):
+    return get_replies_with_participant()
+
+
+def handle_reset(body):
+    return reset_data()
+
+
+HANDLERS = {
+    OP_CREATE_PARTICIPANT: handle_create_participant,
+    OP_GET_PARTICIPANTS: handle_get_participants,
+    OP_GET_PARTICIPANT_BY_ID: handle_get_participant_by_id,
+    OP_CREATE_COMMAND: handle_create_command,
+    OP_GET_COMMANDS: handle_get_commands,
+    OP_GET_COMMAND_BY_ID: handle_get_command_by_id,
+    OP_CREATE_REPLY: handle_create_reply,
+    OP_GET_REPLIES: handle_get_replies,
+    OP_GET_REPLY_BY_ID: handle_get_reply_by_id,
+    OP_GET_REPLIES_WITH_PARTICIPANT: handle_get_replies_with_participant,
+    OP_RESET: handle_reset,
+}
+
 
 def handle_request(opcode: int, body: dict) -> dict:
     """Выполняет операцию по коду и возвращает результат."""
-    if opcode == OP_CREATE_PARTICIPANT:
-        result = create_participant(body['ip'], body['description'])
-    elif opcode == OP_GET_PARTICIPANTS:
-        result = get_participants()
-    elif opcode == OP_GET_PARTICIPANT_BY_ID:
-        result = get_participant_by_id(body['id'])
-    elif opcode == OP_CREATE_COMMAND:
-        result = create_command(body['participant'], body['description'])
-    elif opcode == OP_GET_COMMANDS:
-        result = get_commands()
-    elif opcode == OP_GET_COMMAND_BY_ID:
-        result = get_command_by_id(body['id'])
-    elif opcode == OP_CREATE_REPLY:
-        result = create_reply(body['command'], body['response'])
-    elif opcode == OP_GET_REPLIES:
-        result = get_replies()
-    elif opcode == OP_GET_REPLY_BY_ID:
-        result = get_reply_by_id(body['id'])
-    elif opcode == OP_GET_REPLIES_WITH_PARTICIPANT:
-        result = get_replies_with_participant()
-    elif opcode == OP_RESET:
-        result = reset_data()
-    else:
+    handler = HANDLERS.get(opcode)
+    if handler is None:
         return {'error': f'Неизвестный код операции: {opcode}'}
+    return {'result': handler(body)}
 
-    return {'result': result}
-
-
-# Сервер
 
 def handle_client(conn, addr):
     """Обрабатывает одного клиента в отдельном потоке."""

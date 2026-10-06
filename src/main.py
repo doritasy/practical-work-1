@@ -81,7 +81,107 @@ def get_replies_with_participant():
     return result
 
 
+def cmd_create_participant():
+    ip = input()
+    description = input()
+    print(create_participant(ip, description))
+
+
+def cmd_get_participants():
+    print(get_participants())
+
+
+def cmd_get_participant_by_id():
+    try:
+        id = int(input())
+    except ValueError:
+        print("Ошибка: id должен быть числом")
+        return
+    result = get_participant_by_id(id)
+    if result is None:
+        print("Участник не найден")
+    else:
+        print(result)
+
+
+def cmd_create_command():
+    try:
+        participant = int(input())
+    except ValueError:
+        print("Ошибка: id участника должен быть числом")
+        return
+    if get_participant_by_id(participant) is None:
+        print("Ошибка: участник не найден")
+        return
+    description = input()
+    print(create_command(participant, description))
+
+
+def cmd_get_commands():
+    print(get_commands())
+
+
+def cmd_get_command_by_id():
+    try:
+        id = int(input())
+    except ValueError:
+        print("Ошибка: id должен быть числом")
+        return
+    result = get_command_by_id(id)
+    if result is None:
+        print("Команда не найдена")
+    else:
+        print(result)
+
+
+def cmd_create_reply():
+    try:
+        command = int(input())
+    except ValueError:
+        print("Ошибка: id команды должен быть числом")
+        return
+    if get_command_by_id(command) is None:
+        print("Ошибка: команда не найдена")
+        return
+    response = input()
+    print(create_reply(command, response))
+
+
+def cmd_get_replies():
+    print(get_replies())
+
+
+def cmd_get_reply_by_id():
+    try:
+        id = int(input())
+    except ValueError:
+        print("Ошибка: id должен быть числом")
+        return
+    result = get_reply_by_id(id)
+    if result is None:
+        print("Ответ не найден")
+    else:
+        print(result)
+
+
+def cmd_get_replies_with_participant():
+    print(get_replies_with_participant())
+
+
 def repl():
+    handlers = {
+        'create_participant': cmd_create_participant,
+        'get_participants': cmd_get_participants,
+        'get_participant_by_id': cmd_get_participant_by_id,
+        'create_command': cmd_create_command,
+        'get_commands': cmd_get_commands,
+        'get_command_by_id': cmd_get_command_by_id,
+        'create_reply': cmd_create_reply,
+        'get_replies': cmd_get_replies,
+        'get_reply_by_id': cmd_get_reply_by_id,
+        'get_replies_with_participant': cmd_get_replies_with_participant,
+    }
+
     while True:
         try:
             user_command = input()
@@ -89,78 +189,14 @@ def repl():
             print("\nВыход")
             break
 
-        match user_command:
-            case 'create_participant':
-                ip = input()
-                description = input()
-                print(create_participant(ip, description))
-            case 'get_participants':
-                print(get_participants())
-            case 'get_participant_by_id':
-                try:
-                    id = int(input())
-                except ValueError:
-                    print("Ошибка: id должен быть числом")
-                    continue
-                result = get_participant_by_id(id)
-                if result is None:
-                    print("Участник не найден")
-                else:
-                    print(result)
-            case 'create_command':
-                try:
-                    participant = int(input())
-                except ValueError:
-                    print("Ошибка: id участника должен быть числом")
-                    continue
-                if get_participant_by_id(participant) is None:
-                    print("Ошибка: участник не найден")
-                    continue
-                description = input()
-                print(create_command(participant, description))
-            case 'get_commands':
-                print(get_commands())
-            case 'get_command_by_id':
-                try:
-                    id = int(input())
-                except ValueError:
-                    print("Ошибка: id должен быть числом")
-                    continue
-                result = get_command_by_id(id)
-                if result is None:
-                    print("Команда не найдена")
-                else:
-                    print(result)
-            case 'create_reply':
-                try:
-                    command = int(input())
-                except ValueError:
-                    print("Ошибка: id команды должен быть числом")
-                    continue
-                if get_command_by_id(command) is None:
-                    print("Ошибка: команда не найдена")
-                    continue
-                response = input()
-                print(create_reply(command, response))
-            case 'get_replies':
-                print(get_replies())
-            case 'get_reply_by_id':
-                try:
-                    id = int(input())
-                except ValueError:
-                    print("Ошибка: id должен быть числом")
-                    continue
-                result = get_reply_by_id(id)
-                if result is None:
-                    print("Ответ не найден")
-                else:
-                    print(result)
-            case 'get_replies_with_participant':
-                print(get_replies_with_participant())
-            case 'Выход':
-                break
-            case _:
-                print("Неизвестная команда")
+        if user_command == 'Выход':
+            break
+
+        handler = handlers.get(user_command)
+        if handler is None:
+            print("Неизвестная команда")
+        else:
+            handler()
 
 
 repl()
