@@ -3,7 +3,6 @@ import socket
 from protocol import pack_message, recv_message
 
 
-# Коды операций
 OP_CREATE_PARTICIPANT = 1
 OP_GET_PARTICIPANTS = 2
 OP_GET_PARTICIPANT_BY_ID = 3
@@ -37,9 +36,11 @@ class RpcClient:
             raise Exception(response_body['error'])
         return response_body['result']
 
-    #PARTICIPANT
     def create_participant(self, ip: str, description: str) -> int:
-        return self._call(OP_CREATE_PARTICIPANT, {'ip': ip, 'description': description})
+        return self._call(
+            OP_CREATE_PARTICIPANT,
+            {'ip': ip, 'description': description}
+        )
 
     def get_participants(self):
         return self._call(OP_GET_PARTICIPANTS, {})
@@ -47,9 +48,11 @@ class RpcClient:
     def get_participant_by_id(self, id: int):
         return self._call(OP_GET_PARTICIPANT_BY_ID, {'id': id})
 
-    #COMMAND
     def create_command(self, participant: int, description: str) -> int:
-        return self._call(OP_CREATE_COMMAND, {'participant': participant, 'description': description})
+        return self._call(
+            OP_CREATE_COMMAND,
+            {'participant': participant, 'description': description}
+        )
 
     def get_commands(self):
         return self._call(OP_GET_COMMANDS, {})
@@ -57,9 +60,11 @@ class RpcClient:
     def get_command_by_id(self, id: int):
         return self._call(OP_GET_COMMAND_BY_ID, {'id': id})
 
-    #REPLY
     def create_reply(self, command: int, response: str) -> int:
-        return self._call(OP_CREATE_REPLY, {'command': command, 'response': response})
+        return self._call(
+            OP_CREATE_REPLY,
+            {'command': command, 'response': response}
+        )
 
     def get_replies(self):
         return self._call(OP_GET_REPLIES, {})
@@ -67,10 +72,8 @@ class RpcClient:
     def get_reply_by_id(self, id: int):
         return self._call(OP_GET_REPLY_BY_ID, {'id': id})
 
-    #СЛОЖНЫЙ ЗАПРОС
     def get_replies_with_participant(self):
         return self._call(OP_GET_REPLIES_WITH_PARTICIPANT, {})
 
-    #СБРОС
     def reset(self):
         return self._call(99, {})

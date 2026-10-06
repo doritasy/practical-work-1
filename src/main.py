@@ -1,20 +1,30 @@
+"""
+Модель слоя доступа к данным.
+
+Реализованы операции для трёх сущностей: Participant, Command, Reply.
+Содержит функцию repl() — интерактивный режим.
+"""
+
 import time
 
 participants = {}
 commands = {}
 replies = {}
 
-#1 и 2 задание
+
 def create_participant(ip: str, description: str) -> int:
     id = len(participants)
     participants[id] = {'ip': ip, 'description': description}
     return id
 
+
 def get_participants():
     return participants
 
+
 def get_participant_by_id(id: int):
     return participants.get(id)
+
 
 def create_command(participant: int, description: str) -> int:
     id = len(commands)
@@ -25,11 +35,14 @@ def create_command(participant: int, description: str) -> int:
     }
     return id
 
+
 def get_commands():
     return commands
 
+
 def get_command_by_id(id: int):
     return commands.get(id)
+
 
 def create_reply(command: int, response: str) -> int:
     id = len(replies)
@@ -39,25 +52,24 @@ def create_reply(command: int, response: str) -> int:
     }
     return id
 
+
 def get_replies():
     return replies
+
 
 def get_reply_by_id(id: int):
     return replies.get(id)
 
-#3 задание
+
 def get_replies_with_participant():
     result = []
     now = int(time.time())
     for reply in replies.values():
-        # Находим команду по ссылке из ответа
         command = commands.get(reply['command'])
         if command is None:
             continue
-        # Проверяем условие по времени
         if command['created'] < now - 8 * 60:
             continue
-        # Находим участника по ссылке из команды
         participant = participants.get(command['participant'])
         if participant is None:
             continue
@@ -68,7 +80,7 @@ def get_replies_with_participant():
         })
     return result
 
-#4 и 5 задание
+
 def repl():
     while True:
         try:
@@ -143,13 +155,12 @@ def repl():
                     print("Ответ не найден")
                 else:
                     print(result)
-            case 'get_replies_with_participant': #3 задание
+            case 'get_replies_with_participant':
                 print(get_replies_with_participant())
             case 'Выход':
                 break
             case _:
                 print("Неизвестная команда")
 
-repl()
 
-    
+repl()

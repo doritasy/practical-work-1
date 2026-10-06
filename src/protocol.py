@@ -25,11 +25,11 @@ def pack_message(opcode: int, body: dict) -> bytes:
     """
     json_str = json.dumps(body, ensure_ascii=False)
     json_bytes = json_str.encode('utf-8')
-    
+
     body_size = len(json_bytes)
     size_bytes = int_to_bytes(body_size, SIZE_BYTES)
     opcode_bytes = int_to_bytes(opcode, OPCODE_BYTES)
-    
+
     return size_bytes + opcode_bytes + json_bytes
 
 
@@ -39,10 +39,13 @@ def unpack_message(data: bytes) -> tuple:
     """
     body_size = bytes_to_int(data[:SIZE_BYTES])
     opcode = bytes_to_int(data[SIZE_BYTES:SIZE_BYTES + OPCODE_BYTES])
-    
-    json_bytes = data[SIZE_BYTES + OPCODE_BYTES: SIZE_BYTES + OPCODE_BYTES + body_size]
+
+    json_bytes = data[SIZE_BYTES +
+                      OPCODE_BYTES: SIZE_BYTES +
+                      OPCODE_BYTES +
+                      body_size]
     body = json.loads(json_bytes.decode('utf-8'))
-    
+
     return opcode, body
 
 
@@ -56,15 +59,15 @@ def recv_message(sock) -> tuple:
     header = recv_all(sock, header_size)
     if header is None:
         return None, None
-    
+
     body_size = bytes_to_int(header[:SIZE_BYTES])
     opcode = bytes_to_int(header[SIZE_BYTES:])
-    
+
     # Читаем тело
     body_bytes = recv_all(sock, body_size)
     if body_bytes is None:
         return None, None
-    
+
     body = json.loads(body_bytes.decode('utf-8'))
     return opcode, body
 
