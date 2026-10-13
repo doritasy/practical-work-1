@@ -21,13 +21,11 @@ class RpcServerModel(RuleBasedStateMachine):
     def teardown(self):
         self.client.close()
 
-    # PARTICIPANT
     @rule(ip=st.text(min_size=1), description=st.text(min_size=1))
     def create_participant(self, ip, description):
         pid = self.client.create_participant(ip, description)
         assert pid == self.next_participant_id
 
-        # Ключ — строка, потому что JSON возвращает строковые ключи
         self.model_participants[str(pid)] = {
             'ip': ip, 'description': description}
         self.next_participant_id += 1
@@ -42,7 +40,6 @@ class RpcServerModel(RuleBasedStateMachine):
         server_data = self.client.get_participant_by_id(pid)
         assert server_data == self.model_participants.get(str(pid))
 
-    # COMMAND
     @rule(participant=st.integers(min_value=0, max_value=100),
           description=st.text(min_size=1))
     def create_command(self, participant, description):
@@ -80,7 +77,6 @@ class RpcServerModel(RuleBasedStateMachine):
         else:
             assert server_data is None
 
-    # REPLY
     @rule(command=st.integers(min_value=0, max_value=100),
           response=st.text(min_size=1))
     def create_reply(self, command, response):
@@ -101,7 +97,6 @@ class RpcServerModel(RuleBasedStateMachine):
         server_data = self.client.get_reply_by_id(rid)
         assert server_data == self.model_replies.get(str(rid))
 
-    # СЛОЖНЫЙ ЗАПРОС
     @rule()
     def complex_query(self):
         server_result = self.client.get_replies_with_participant()
@@ -125,7 +120,6 @@ class RpcServerModel(RuleBasedStateMachine):
         for item in model_result:
             assert item in server_result
 
-    # ИНВАРИАНТ
     @invariant()
     def sizes_agree(self):
         assert len(

@@ -214,7 +214,7 @@ def start_server(host: str = '127.0.0.1', port: int = 8000):
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((host, port))
     server.listen(5)
-    print(f'[Сервер] Запущен на {host}:{port}')
+    print(f'[Сервер] Запущен на {host}: {port}')
 
     try:
         while True:

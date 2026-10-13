@@ -1,10 +1,8 @@
 import json
 import struct
 
-# Размер поля "размер тела" — 5 байт
 SIZE_BYTES = 5
 
-# Размер поля "код операции" — 1 байт
 OPCODE_BYTES = 1
 
 
@@ -54,7 +52,6 @@ def recv_message(sock) -> tuple:
     Читает из сокета одно полное сообщение.
     Возвращает (opcode, body) или (None, None), если соединение закрыто.
     """
-    # Читаем заголовок: 5 байт (размер) + 1 байт (код операции)
     header_size = SIZE_BYTES + OPCODE_BYTES
     header = recv_all(sock, header_size)
     if header is None:
@@ -63,7 +60,6 @@ def recv_message(sock) -> tuple:
     body_size = bytes_to_int(header[:SIZE_BYTES])
     opcode = bytes_to_int(header[SIZE_BYTES:])
 
-    # Читаем тело
     body_bytes = recv_all(sock, body_size)
     if body_bytes is None:
         return None, None
